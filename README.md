@@ -6,3 +6,4 @@ minialphago_reversi with MCTS ; AI project
 3. http://mcts.ai/code/java.html 主要参考
 4. http://www.baeldung.com/java-monte-carlo-tree-search 概念介绍
 5. https://en.wikipedia.org/wiki/Monte_Carlo_tree_search
+6. https://github.com/kentan/reversi-mcts/blob/master/python/player/ 这个的走子策略可以借鉴
