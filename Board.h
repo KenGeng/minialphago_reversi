@@ -168,8 +168,10 @@ public:
     }
     void judge(){
         if (blackPieceCount>whitePieceCount) {
+            cout<<"b:"<<blackPieceCount<<" "<<"w:"<<whitePieceCount<<endl;
             cout<<"Black win!"<<endl;
         } else if (blackPieceCount<whitePieceCount) {
+            cout<<"b:"<<blackPieceCount<<" "<<"w:"<<whitePieceCount<<endl;
             cout<<"White win!"<<endl;
         } else{
             cout<<"Draw game huh!"<<endl;
