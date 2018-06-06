@@ -6,11 +6,21 @@
 #define MINIALPHAGO_REVERSI_BOARD_H
 
 #include <cstring>
+#include <list>
 using namespace std;
 
 //8 possible directions to form  enclosure
 static const int direction[8][2]={{1,1},{0,1},{-1,1},{-1,0},{-1,-1},{0,-1},{1,-1},{1,0}};
-
+const int valueOfPos[8][8] = {//价值矩阵 用于快速走子
+        30, 2, 20, 15, 15, 20,  2, 30,
+        2,  1,  2,  8,  8,  2,  1,  2,
+        20, 2,  9,  9,  9,  9,  2, 20,
+        15, 8,  9,  2,  2,  9,  8, 15,
+        15, 8,  9,  2,  2,  9,  8, 15,
+        20, 2,  9,  9,  9,  9,  2, 20,
+        2,  1,  2,  8,  8,  2,  1,  2,
+        30, 2, 20, 15, 15, 20,  2, 20
+};
 class Board{
 
 public:
@@ -80,6 +90,18 @@ public:
                 }
         return false;
     }
+
+    list<pair<pair<int, int>,int>> findValidMove(){
+        list<pair<pair<int, int>,int>> result;
+        int x, y;
+        for (y = 0; y < 8; y++)
+            for (x = 0; x < 8; x++)
+                if (ProcStep(x, y, true)){
+                    result.emplace_back(make_pair(x,y),valueOfPos[x][y]);//类似于push_back 不过避免了多余的临时变量
+                }
+        return result;
+    }
+
     //change x,y to a designated direction for further detection
     inline bool MoveStep(int &x, int &y, int Direction)
     {
@@ -166,15 +188,26 @@ public:
         else
             return false;
     }
-    void judge(){
+    int judge(bool flag){
         if (blackPieceCount>whitePieceCount) {
-            cout<<"b:"<<blackPieceCount<<" "<<"w:"<<whitePieceCount<<endl;
-            cout<<"Black win!"<<endl;
+            if (flag) {
+                cout<<"b:"<<blackPieceCount<<" "<<"w:"<<whitePieceCount<<endl;
+                cout<<"Black win!"<<endl;
+            }
+            return 1;
         } else if (blackPieceCount<whitePieceCount) {
-            cout<<"b:"<<blackPieceCount<<" "<<"w:"<<whitePieceCount<<endl;
-            cout<<"White win!"<<endl;
+            if (flag) {
+                cout<<"b:"<<blackPieceCount<<" "<<"w:"<<whitePieceCount<<endl;
+                cout<<"White win!"<<endl;
+            }
+
+            return -1;
         } else{
-            cout<<"Draw game huh!"<<endl;
+            if (flag) {
+
+                cout<<"Draw game huh!"<<endl;
+            }
+            return 0;
         }
     }
     ~Board(){

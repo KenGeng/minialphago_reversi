@@ -2,7 +2,7 @@
 //#include "Board.h"
 #include "MonteCarlo.h"
 
-#define MAX_ITER 1000
+#define MAX_ITER 2333
 
 //todo:可以考虑设置每一步的时间限制?
 const clock_t startTime = clock();
@@ -38,12 +38,15 @@ int main() {
 
             int x,y;
             if (GameBoard.player==myState) {//first turn
+                //人工走子
                 cin>>x>>y;
 //                place a piece and check if it is legal
                 while(!GameBoard.ProcStep(x,y, false)){
                     cout<<"illegal move"<<endl;
                     cin>>x>>y;
                 }
+
+                //下面注释的代码是让迭代不同轮数的AI对打
 //                cout<<"Monte-Carlo AI1 begin!"<<endl;
 //                TreeNode mm2= TreeNode(GameBoard);
 //                for (int i = 0; i < 100; ++i) {
@@ -104,6 +107,6 @@ int main() {
         }
 
     }
-    GameBoard.judge();//judge who wins game
+    GameBoard.judge(true);//judge who wins game
     return 0;
 }

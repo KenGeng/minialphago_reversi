@@ -21,7 +21,7 @@ int debug = 0;//打印中间信息
 class TreeNode{
 public:
     Board tmpBoard;//game state
-
+    int layer;
     TreeNode* father;
     list<TreeNode*> child;
 
@@ -38,6 +38,7 @@ public:
         timesOfWin = 0;
         totalVisit = 0;
         winRate = 0;
+        layer = 0;
 
     }
     TreeNode(Board gameBoard){
@@ -46,6 +47,7 @@ public:
         timesOfWin = 0;
         totalVisit = 0;
         winRate = 0;
+        layer = 0;
 
     }
     double getGrade() {
@@ -77,10 +79,10 @@ public:
             TreeNode temp = *(*iter);
 
             double  randomFactor = genRandom(0,1) ;
-
+            //todo: 这里的uct公式可以调,我用的版本可能有些奇怪
             double uctValue =
                     temp.timesOfWin / (temp.totalVisit+delta) +
-                    2*sqrt(2*temp.totalVisit +1) / (temp.totalVisit+ delta)+randomFactor*delta;
+                    sqrt(2*temp.totalVisit +1) / (temp.totalVisit+ delta)+randomFactor*delta;
 
             // small random number to break ties randomly in unexpanded node ?
             if (uctValue >= bestValue) {//找到uctValue最大的子节点
@@ -114,6 +116,9 @@ public:
                     n_child->tmpBoard.ProcStep(x,y, false);
                     n_child->tmpBoard.player*=-1;
                     n_child->father = this;
+
+                    //this->layer++;
+                    n_child->layer = this->layer+1;
 //                    cout<<"ex.child"<<n_child<<endl;
 //                    cout<<"ex.father"<<n_child->father<<endl;
                     child.push_back(n_child);//memory leak?
@@ -130,11 +135,32 @@ public:
     double simulation(){
 
         //todo: try to use a roll-out method ;
-        double  res = genRandom(0,1) ;
-       if (debug) {
-           cout<<"simulation:"<<res;
+//        double  res = genRandom(0,1) ;
+//       if (debug) {
+//           cout<<"simulation:"<<res;
+//       }
+       Board rollOut = tmpBoard;
+       int r_player = tmpBoard.player;
+       while(1){
+           if (rollOut.checkHasValidMove()) {
+               list<pair<pair<int, int>,int>> temp = rollOut.findValidMove();
+//使用价值矩阵
+//               auto bestChoice = std::max_element(temp.begin(), temp.end(),compare);
+//               rollOut.ProcStep((*bestChoice).first.first,(*bestChoice).first.second, false);
+        //随机走子
+               auto it = std::next(temp.begin(), genRandom(0,temp.size()));
+               rollOut.ProcStep((*it).first.first,(*it).first.second, false);
+               rollOut.player*=-1;
+           }else{
+               rollOut.player*=-1;
+               if (!rollOut.checkHasValidMove()){//both have no legal move; game end.
+                   break;
+               }
+           }
+
        }
-        return res;
+
+        return rollOut.judge(false)>0?1:0;
     }
 
     TreeNode* backpropagate(double value){
@@ -169,6 +195,9 @@ public:
         while (!cur->child.empty()) {
             cur = cur->select();
         }
+        if (debug) {
+            cout<<"layer:"<<cur->layer<<endl;
+        }
         cur->expand();
         if (debug) {
             cout<<"root_child:"<<child.size()<<endl;
@@ -186,6 +215,10 @@ public:
     }
 
 
+    static bool compare(const pair<pair<int, int>,int> s1, const pair<pair<int, int>,int> s2){
+//    return s1->timesOfWin/s1->totalVisit<s2->timesOfWin/s2->totalVisit;
+        return s1.second<s2.second;//据说有奇效？
+    };
 };
 
 
