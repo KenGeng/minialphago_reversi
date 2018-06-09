@@ -1,9 +1,9 @@
 #include <iostream>
 //#include "Board.h"
 #include "MonteCarlo.h"
-
+#include <time.h>
 #define MAX_ITER 2333
-
+#define MAX_TIME 30 //set max second for each step
 //todo:可以考虑设置每一步的时间限制?
 const clock_t startTime = clock();
 const clock_t TIMELIMIT = CLOCKS_PER_SEC;
@@ -11,8 +11,6 @@ const clock_t TIMELIMIT = CLOCKS_PER_SEC;
 int myState= 1;//1:black -1:white
 using namespace std;
 
-
-int current_player = 1 ;//1:black -1: white
 
 //compare function for max_element
 static bool comp(const TreeNode* s1, const TreeNode* s2){
@@ -71,13 +69,15 @@ int main() {
 
                 TreeNode mm= TreeNode(GameBoard);
 
-
-                for (int i = 0; i < MAX_ITER; ++i) {
+                clock_t t1 = clock();
+                while ((clock() - t1) * 1.0 / CLOCKS_PER_SEC < MAX_TIME){
                     mm.doMove();
                 }
+//                for (int i = 0; i < MAX_ITER; ++i) {
+//                    mm.doMove();
+//                }
 
                 double  best_value = 0;
-                auto iter = mm.child.begin();
 
                 auto bestChoice = std::max_element(mm.child.begin(), mm.child.end(),comp);
 
