@@ -139,7 +139,7 @@ public:
                     effectivePoints[currCount][0] = x;
                     effectivePoints[currCount][1] = y;
                 }
-                //in the direction, there is a empty piece
+                    //in the direction, there is a empty piece
                 else if (chessBoard[x][y] == 0)
                 {
                     currCount = 0;//not a legal move
@@ -188,7 +188,8 @@ public:
         else
             return false;
     }
-    int judge(bool flag){
+
+    double judge(bool flag){
         if (blackPieceCount>whitePieceCount) {
             if (flag) {
                 cout<<"b:"<<blackPieceCount<<" "<<"w:"<<whitePieceCount<<endl;
@@ -201,13 +202,13 @@ public:
                 cout<<"White win!"<<endl;
             }
 
-            return -1;
+            return 0;
         } else{
             if (flag) {
 
                 cout<<"Draw game huh!"<<endl;
             }
-            return 0;
+            return 0.5;
         }
     }
     ~Board(){

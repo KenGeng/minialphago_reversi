@@ -73,21 +73,20 @@ public:
         TreeNode* selected = nullptr;
         double bestValue = -10000;
 
-        list<TreeNode*>::iterator iter;
-        for (iter = child.begin(); iter!= child.end(); iter ++)//遍历子节点列表
+        for (auto iter : child)//遍历子节点列表
         {
-            TreeNode temp = *(*iter);
+            TreeNode temp = *(iter);
 
             double  randomFactor = genRandom(0,1) ;
-            //todo: 这里的uct公式可以调,我用的版本可能有些奇怪
-            double uctValue =
-                    temp.timesOfWin / (temp.totalVisit+delta) +
+                    //根据下棋方的颜色进行相应的调整
+            double uctValue = temp.tmpBoard.player==1?
+                    temp.timesOfWin / (temp.totalVisit+delta):(temp.totalVisit-temp.timesOfWin) / (temp.totalVisit+delta)+
                     sqrt(2*temp.totalVisit +1) / (temp.totalVisit+ delta)+randomFactor*delta;
 
-            // small random number to break ties randomly in unexpanded node ?
+            // small random number to break ties randomly in unexpanded node
             if (uctValue >= bestValue) {//找到uctValue最大的子节点
 
-                selected = *iter;
+                selected = iter;
                 bestValue = uctValue;
             }
             if (debug) {
@@ -101,10 +100,7 @@ public:
 
     bool expand(){
         //reach game end; no expansion
-        if (tmpBoard.isEnd)
-        {
-            return false;
-        }
+
         int posCount = 0, choice;
 
         for (int y = 0; y < 8; y++)
@@ -113,8 +109,8 @@ public:
                 {
                     posCount++;
                     TreeNode* n_child = new TreeNode(tmpBoard);
-                    n_child->tmpBoard.ProcStep(x,y, false);
-                    n_child->tmpBoard.player*=-1;
+                    n_child->tmpBoard.ProcStep(x,y, false);//do a move
+                    n_child->tmpBoard.player*=-1;//change player
                     n_child->father = this;
 
                     //this->layer++;
@@ -124,9 +120,30 @@ public:
                     child.push_back(n_child);//memory leak?
                 }
 
-        if (posCount==0)
+        if (posCount==0)// no legal move for this player
         {
-            return false;
+            int posCount2 = 0;
+            tmpBoard.player*=-1;//change color to check the other player
+            for (int y = 0; y < 8; y++)
+                for (int x = 0; x < 8; x++)
+                    if (tmpBoard.ProcStep(x,y,true))
+                    {
+                        posCount2++;
+                        TreeNode* n_child = new TreeNode(tmpBoard);
+                        n_child->tmpBoard.ProcStep(x,y, false);//do a move
+                        n_child->tmpBoard.player*=-1;//change player
+                        n_child->father = this;
+
+                        //this->layer++;
+                        n_child->layer = this->layer+1;
+
+                        child.push_back(n_child);
+                    }
+            tmpBoard.player*=-1;//recover
+            if (posCount2==0) {
+                return false;// game over
+            }
+
         }
         return true;
 
@@ -134,33 +151,29 @@ public:
 
     double simulation(){
 
-        //todo: try to use a roll-out method ;
-//        double  res = genRandom(0,1) ;
-//       if (debug) {
-//           cout<<"simulation:"<<res;
-//       }
-       Board rollOut = tmpBoard;
-       int r_player = tmpBoard.player;
-       while(1){
-           if (rollOut.checkHasValidMove()) {
-               list<pair<pair<int, int>,int>> temp = rollOut.findValidMove();
+
+        Board rollOut = tmpBoard;
+        int r_player = tmpBoard.player;
+        while(1){
+            if (rollOut.checkHasValidMove()) {
+                list<pair<pair<int, int>,int>> temp = rollOut.findValidMove();
 //使用价值矩阵
 //               auto bestChoice = std::max_element(temp.begin(), temp.end(),compare);
 //               rollOut.ProcStep((*bestChoice).first.first,(*bestChoice).first.second, false);
-        //随机走子
-               auto it = std::next(temp.begin(), genRandom(0,temp.size()));
-               rollOut.ProcStep((*it).first.first,(*it).first.second, false);
-               rollOut.player*=-1;
-           }else{
-               rollOut.player*=-1;
-               if (!rollOut.checkHasValidMove()){//both have no legal move; game end.
-                   break;
-               }
-           }
+                //随机走子
+                auto it = std::next(temp.begin(), genRandom(0,temp.size()));
+                rollOut.ProcStep((*it).first.first,(*it).first.second, false);
+                rollOut.player*=-1;
+            }else{
+                rollOut.player*=-1;
+                if (!rollOut.checkHasValidMove()){//both have no legal move; game end.
+                    break;
+                }
+            }
 
-       }
+        }
 
-        return rollOut.judge(false)>0?1:0;
+        return rollOut.judge(false);//black win,return 1; white win, return 0;draw game, 0.5
     }
 
     TreeNode* backpropagate(double value){
@@ -171,7 +184,10 @@ public:
 
         while (tmp->father!= nullptr) {
             (tmp->father->totalVisit)++;
-            tmp->father->timesOfWin+=value;
+            if (tmp->tmpBoard.player == 1) {//tmp is black turn,just add value
+                tmp->father->timesOfWin+=value;
+            }else tmp->father->timesOfWin+=(1-value);//white,add 1-value
+
             if (debug) {
                 cout<<"bp value:"<<value<<endl;
                 cout<<"bp.tmp.father.vis"<<tmp->father->totalVisit<<endl;

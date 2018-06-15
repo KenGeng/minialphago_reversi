@@ -1,0 +1,34 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/apple/Documents/GitHub/minialphago_reversi/Board.h
+cstring
+-
+list
+-
+
+/Users/apple/Documents/GitHub/minialphago_reversi/MonteCarlo.h
+iostream
+-
+Board.h
+/Users/apple/Documents/GitHub/minialphago_reversi/Board.h
+list
+-
+cmath
+-
+random
+-
+
+/Users/apple/Documents/GitHub/minialphago_reversi/main.cpp
+iostream
+-
+MonteCarlo.h
+/Users/apple/Documents/GitHub/minialphago_reversi/MonteCarlo.h
+time.h
+-
+

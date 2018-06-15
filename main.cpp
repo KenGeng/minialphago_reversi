@@ -3,10 +3,7 @@
 #include "MonteCarlo.h"
 #include <time.h>
 #define MAX_ITER 2333
-#define MAX_TIME 30 //set max second for each step
-//todo:可以考虑设置每一步的时间限制?
-const clock_t startTime = clock();
-const clock_t TIMELIMIT = CLOCKS_PER_SEC;
+#define MAX_TIME 2 //set max second for each step
 
 int myState= 1;//1:black -1:white
 using namespace std;
@@ -37,32 +34,32 @@ int main() {
             int x,y;
             if (GameBoard.player==myState) {//first turn
                 //人工走子
-                cin>>x>>y;
-//                place a piece and check if it is legal
-                while(!GameBoard.ProcStep(x,y, false)){
-                    cout<<"illegal move"<<endl;
-                    cin>>x>>y;
-                }
+//                cin>>x>>y;
+////                place a piece and check if it is legal
+//                while(!GameBoard.ProcStep(x,y, false)){
+//                    cout<<"illegal move"<<endl;
+//                    cin>>x>>y;
+//                }
 
                 //下面注释的代码是让迭代不同轮数的AI对打
-//                cout<<"Monte-Carlo AI1 begin!"<<endl;
-//                TreeNode mm2= TreeNode(GameBoard);
-//                for (int i = 0; i < 100; ++i) {
-//                    mm2.doMove();
-//                }
-//
-//                double  best_value = 0;
-//
-//                auto bestChoice = std::max_element(mm2.child.begin(), mm2.child.end(),comp);
-//
-//                best_value = (*bestChoice)->getGrade();
-//                cout<<"best win rate 1 :"<<best_value<<"\n";
-//
-//                GameBoard = (*bestChoice)->tmpBoard;
-//
-//                cout<<"Monte AI 1 Done!"<<endl;
-//
-//                GameBoard.player*=-1;//extra change of player for that we use monte-carlo to choose a best child,while the player of child has been changed; double change=>no change
+                cout<<"Monte-Carlo AI1 begin!"<<endl;
+                TreeNode mm2= TreeNode(GameBoard);
+                for (int i = 0; i < 100; ++i) {
+                    mm2.doMove();
+                }
+
+                double  best_value = 0;
+
+                auto bestChoice = std::max_element(mm2.child.begin(), mm2.child.end(),comp);
+
+                best_value = (*bestChoice)->getGrade();
+                cout<<"best win rate 1 :"<<best_value<<"\n";
+
+                GameBoard = (*bestChoice)->tmpBoard;
+
+                cout<<"Monte AI 1 Done!"<<endl;
+
+                GameBoard.player*=-1;//extra change of player for that we use monte-carlo to choose a best child,while the player of child has been changed; double change=>no change
 
             }else{
                 cout<<"Monte-Carlo AI2 begin!"<<endl;
